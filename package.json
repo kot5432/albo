@@ -4,9 +4,7 @@
   "description": "ユーザーが初動する心理トリガーを体験できるプロトタイプアプリケーションです。",
   "main": "script.js",
   "scripts": {
-    "dev": "http-server -p 8000 -o",
-    "start": "http-server -p 8000 -o",
-    "serve": "python -m http.server 8000",
+    "start": "http-server -p 8000",
     "build": "echo 'Static site build completed'",
     "vercel-build": "echo 'Static site ready for deployment'",
     "test": "echo \"Error: no test specified\" && exit 1"

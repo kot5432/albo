@@ -586,6 +586,53 @@ input[type="checkbox"] {
     animation: fadeIn 0.5s ease;
 }
 
+/* モーダル表示時にスクロールを禁止 */
+body.no-scroll {
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* アニメーション：文字が浮き出てくる感じ */
+@keyframes fluidReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+        filter: blur(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+.reveal-text {
+    animation: fluidReveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* 宣言モーダルをより没入感のあるデザインに */
+#declarationModal .modal-content {
+    background: radial-gradient(circle at center, #1a1f35 0%, #0d1117 100%);
+    border: none;
+    box-shadow: 0 0 50px rgba(79, 172, 254, 0.1);
+    max-width: 650px;
+    padding: 20px;
+}
+
+#declarationModal .modal-header h2 {
+    font-size: 2rem;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+/* スクロールバーの非表示（没入感のため） */
+.no-scroll::-webkit-scrollbar {
+    display: none;
+}
+
 /* スクロールバー */
 ::-webkit-scrollbar {
     width: 8px;

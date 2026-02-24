@@ -596,6 +596,13 @@ class ChallengeApp {
     // モーダル表示
     showModal(modalId) {
         document.getElementById(modalId).classList.add('active');
+        document.body.classList.add('no-scroll');
+
+        // 没入感アニメーション用のクラス追加
+        const content = document.querySelector(`#${modalId} .modal-content`);
+        if (content) {
+            content.classList.add('reveal-text');
+        }
 
         // 理由モーダルの場合はランダム理由を表示
         if (modalId === 'reasonModal') {
@@ -606,6 +613,17 @@ class ChallengeApp {
     // モーダル非表示
     hideModal(modalId) {
         document.getElementById(modalId).classList.remove('active');
+
+        // 他にアクティブなモーダルがなければno-scrollを解除
+        const activeModals = document.querySelectorAll('.modal.active');
+        if (activeModals.length === 0) {
+            document.body.classList.remove('no-scroll');
+        }
+
+        const content = document.querySelector(`#${modalId} .modal-content`);
+        if (content) {
+            content.classList.remove('reveal-text');
+        }
     }
 
     // エラー表示
