@@ -1,29 +1,64 @@
+/* デザインシステム (Design Tokens) */
+:root {
+    --bg-color: #0d1117;
+    --card-bg: rgba(22, 27, 34, 0.7);
+    --primary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --text-primary: #f0f6fc;
+    --text-secondary: #8b949e;
+    --accent-blue: #58a6ff;
+    --accent-purple: #bc8cff;
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* 基本設定 */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background-color: #1B1F3B;
-    color: white;
+    font-family: var(--font-sans);
+    background-color: var(--bg-color);
+    background-image:
+        radial-gradient(at 0% 0%, rgba(74, 144, 226, 0.15) 0, transparent 50%),
+        radial-gradient(at 50% 0%, rgba(123, 104, 238, 0.1) 0, transparent 50%);
+    color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
+    min-height: 100vh;
 }
 
 .container {
     max-width: 600px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 24px;
 }
 
 /* スクリーン管理 */
 .screen {
     display: none;
     min-height: 100vh;
-    padding: 40px 20px;
+    padding: 60px 24px;
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .screen.active {
@@ -33,77 +68,102 @@ body {
 /* LPスタイル */
 #lp {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
 }
 
 .logo h1 {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-    background: linear-gradient(45deg, #4A90E2, #7B68EE);
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    background: var(--primary-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    letter-spacing: -1px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .logo p {
-    font-size: 1.2rem;
-    opacity: 0.8;
-    margin-bottom: 40px;
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    margin-bottom: 48px;
+    font-weight: 400;
 }
 
 /* ボタンスタイル */
 .btn-primary {
-    background: linear-gradient(45deg, #4A90E2, #7B68EE);
-    color: white;
+    background: var(--primary-gradient);
+    color: #0d1117;
     border: none;
-    padding: 16px 32px;
-    border-radius: 12px;
+    padding: 16px 36px;
+    border-radius: 14px;
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+    transition: var(--transition-base);
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.2);
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(79, 172, 254, 0.35);
+}
+
+.btn-primary:active {
+    transform: translateY(-1px);
 }
 
 .btn-primary:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
+    transform: none !important;
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
     padding: 12px 24px;
-    border-radius: 8px;
+    border-radius: 12px;
     font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+    transition: var(--transition-base);
+    backdrop-filter: blur(12px);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
 }
 
 /* ホーム画面 */
 .challenge-card {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
-    padding: 30px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 30px;
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 32px;
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    margin-bottom: 32px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.challenge-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
 }
 
 .challenge-card h2 {
@@ -280,7 +340,7 @@ input[type="checkbox"] {
     cursor: pointer;
 }
 
-.form-group label input[type="checkbox"] + span {
+.form-group label input[type="checkbox"]+span {
     vertical-align: middle;
     cursor: pointer;
 }
@@ -465,24 +525,24 @@ input[type="checkbox"] {
     .container {
         padding: 15px;
     }
-    
+
     .actions {
         grid-template-columns: 1fr;
     }
-    
+
     .statistics {
         grid-template-columns: 1fr;
     }
-    
+
     .modal-content {
         width: 95%;
         margin: 10px;
     }
-    
+
     .logo h1 {
         font-size: 2.5rem;
     }
-    
+
     .countdown #timeRemaining {
         font-size: 2rem;
     }
@@ -492,13 +552,13 @@ input[type="checkbox"] {
     .challenge-card {
         padding: 20px;
     }
-    
+
     .modal-header,
     .modal-body,
     .modal-footer {
         padding: 20px;
     }
-    
+
     .btn-primary {
         padding: 14px 28px;
         font-size: 1rem;
@@ -511,6 +571,7 @@ input[type="checkbox"] {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
