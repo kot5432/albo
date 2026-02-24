@@ -347,12 +347,12 @@ input[type="checkbox"] {
 
 /* AIチェック */
 .ai-check {
-    margin-top: 8px;
+    margin-top: 10px;
     font-size: 0.9rem;
-}
-
-.check-status {
-    color: #4CAF50;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
 }
 
 /* 警告 */

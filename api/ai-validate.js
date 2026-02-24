@@ -17,42 +17,63 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Text is required' });
     }
 
-    const model = google('gemini-1.5-flash');
-
     const prompt = `
-以下のテキストが具体的か抽象的を判定してください。
-抽象的な表現の例：頑張る、努力する、がんばる、する、やる、取り組む
-具体的な表現の例：毎日30分間プログラミングを学習する、1日10ページ読書する
+あなたは挑戦内容の具体性を判定する専門AIです。
 
-テキスト：${text}
+以下の基準で評価してください。
 
-判定結果（具体的 or 抽象的）と理由を簡潔に：
+【具体的の定義】
+・行動が明確
+・時間や量が定義されている
+・今日から行動できる
+
+【抽象的の定義】
+・概念的（例：頑張る、成功する、変わる）
+・期限や量がない
+・何をすればいいか不明確
+
+必ずJSONで返してください。
+
+{
+  "isConcrete": boolean,
+  "reason": "なぜそう判断したか",
+  "improvedExample": "抽象的な場合のみ具体例を出す"
+}
+
+判定対象：${text}
 `;
 
     const { text: result } = await generateText({
       model,
       prompt,
-      maxTokens: 150,
-      temperature: 0.3,
+      maxTokens: 300,
+      temperature: 0.1,
     });
 
-    const isAbstract = result.includes('抽象') || result.includes('あいまい');
-    
-    return res.status(200).json({ 
-      isValid: !isAbstract,
-      message: isAbstract ? 'もっと具体的にしてください' : '✓ 具体的な表現です',
-      details: result.trim(),
-      success: true 
+    // JSONを抽出（AIが前後にテキストを付けても大丈夫なように）
+    const jsonMatch = result.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('AIが有効なJSONを出力しませんでした');
+    }
+
+    const data = JSON.parse(jsonMatch[0]);
+
+    return res.status(200).json({
+      isValid: data.isConcrete,
+      message: data.isConcrete ? '✓ 具体的な表現です' : 'もっと具体的にしてください',
+      reason: data.reason,
+      improvedExample: data.improvedExample,
+      success: true
     });
 
   } catch (error) {
     console.error('Validation error:', error);
-    
+
     // フォールバック：ルールベースチェック
     const abstractWords = ['頑張る', '努力する', 'がんばる', 'する', 'やる', '取り組む'];
     const isAbstract = abstractWords.some(word => text.includes(word));
-    
-    return res.status(200).json({ 
+
+    return res.status(200).json({
       isValid: !isAbstract,
       message: isAbstract ? '⚠ もっと具体的にしてください' : '✓ 具体的な表現です',
       success: true,

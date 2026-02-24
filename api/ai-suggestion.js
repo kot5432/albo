@@ -20,7 +20,10 @@ export default async function handler(req, res) {
     const model = google('gemini-1.5-flash');
 
     const prompt = `
-以下の挑戦に対して、今日できる最小の行動を1つだけ提案してください。
+あなたは挑戦初動設計AIです。
+ユーザーの挑戦を24時間以内に必ず動ける最小の具体的行動に分解してください。
+抽象的にしないでください。
+
 ルール：
 - 5分以内でできること
 - 具体的で簡単な行動
@@ -39,14 +42,14 @@ export default async function handler(req, res) {
       temperature: 0.7,
     });
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       suggestion: text.trim(),
-      success: true 
+      success: true
     });
 
   } catch (error) {
     console.error('AI suggestion error:', error);
-    
+
     // フォールバック：ルールベースの提案
     const fallbackSuggestions = {
       'プログラミング': 'エディタを開いてHello Worldを書く',
@@ -69,7 +72,7 @@ export default async function handler(req, res) {
       }
     }
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       suggestion,
       success: true,
       fallback: true

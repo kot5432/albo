@@ -14,7 +14,7 @@ class ChallengeApp {
         ];
         this.countdownTimer = null;
         this.startTime = null;
-        
+
         this.init();
     }
 
@@ -165,6 +165,11 @@ class ChallengeApp {
         document.getElementById('challengeInput').addEventListener('input', (e) => {
             this.checkInputValidity(e.target.value);
         });
+
+        // AIで具体化ボタン
+        document.getElementById('autoConcretize').addEventListener('click', () => {
+            this.concretizeChallenge();
+        });
     }
 
     // AI提案生成
@@ -179,7 +184,7 @@ class ChallengeApp {
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 return data.suggestion;
             } else {
@@ -187,7 +192,7 @@ class ChallengeApp {
             }
         } catch (error) {
             console.error('AI suggestion error:', error);
-            
+
             // フォールバック：ルールベースの提案
             const suggestions = {
                 'プログラミング': 'エディタを開いてHello Worldを書く',
@@ -214,7 +219,14 @@ class ChallengeApp {
     // 入力の妥当性チェック
     async checkInputValidity(input) {
         const checkStatus = document.querySelector('.check-status');
-        
+        const autoConcretizeBtn = document.getElementById('autoConcretize');
+
+        if (!input) {
+            checkStatus.textContent = '';
+            autoConcretizeBtn.style.display = 'none';
+            return false;
+        }
+
         try {
             const response = await fetch('/api/ai-validate', {
                 method: 'POST',
@@ -225,10 +237,19 @@ class ChallengeApp {
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 checkStatus.textContent = data.message;
                 checkStatus.style.color = data.isValid ? '#4CAF50' : '#FF5722';
+
+                if (!data.isValid) {
+                    autoConcretizeBtn.style.display = 'block';
+                    // 理由をツールチップやタイトルのように表示することも可能
+                    checkStatus.title = data.reason || '';
+                } else {
+                    autoConcretizeBtn.style.display = 'none';
+                }
+
                 return data.isValid;
             }
         } catch (error) {
@@ -238,19 +259,62 @@ class ChallengeApp {
         // フォールバック：ルールベースチェック
         const abstractWords = ['頑張る', '努力する', 'がんばる', 'する', 'やる', '取り組む'];
         const isAbstract = abstractWords.some(word => input.includes(word));
-        
+
         if (isAbstract) {
             checkStatus.textContent = '⚠ もっと具体的にしてください';
             checkStatus.style.color = '#FF5722';
+            autoConcretizeBtn.style.display = 'block';
         } else if (input.length < 5) {
             checkStatus.textContent = '⚠ もっと詳しく書いてください';
             checkStatus.style.color = '#FF5722';
+            autoConcretizeBtn.style.display = 'none';
         } else {
             checkStatus.textContent = '✓ 具体的な表現です';
             checkStatus.style.color = '#4CAF50';
+            autoConcretizeBtn.style.display = 'none';
         }
-        
+
         return !isAbstract && input.length >= 5;
+    }
+
+    // AIによる具体化を実行
+    async concretizeChallenge() {
+        const input = document.getElementById('challengeInput');
+        const autoConcretizeBtn = document.getElementById('autoConcretize');
+        const originalText = input.value;
+
+        try {
+            autoConcretizeBtn.disabled = true;
+            autoConcretizeBtn.textContent = '具体化中...';
+
+            const response = await fetch('/api/ai-concretize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: originalText }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // 具体化された内容を反映
+                input.value = `${data.title}\n${data.description}\n（指標：${data.metric}）`;
+                // 期限の提案があれば反映（任意）
+                if (data.deadlineSuggestion && !document.getElementById('deadline').value) {
+                    // 推奨期限をセットするなどの処理
+                }
+
+                // 再バリデーション
+                this.checkInputValidity(input.value);
+            }
+        } catch (error) {
+            console.error('Concretize error:', error);
+            this.showError('AIによる具体化に失敗しました');
+        } finally {
+            autoConcretizeBtn.disabled = false;
+            autoConcretizeBtn.textContent = 'AIで具体化する';
+        }
     }
 
     // 挑戦作成
@@ -274,7 +338,7 @@ class ChallengeApp {
 
         this.startTime = new Date().toISOString();
         this.saveToStorage();
-        
+
         this.hideModal('irreversibleModal');
         this.showScreen('home');
         this.updateUI();
@@ -309,7 +373,7 @@ class ChallengeApp {
             const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
 
-            document.getElementById('timeRemaining').textContent = 
+            document.getElementById('timeRemaining').textContent =
                 `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }, 1000);
     }
@@ -331,11 +395,11 @@ class ChallengeApp {
 
         this.currentChallenge.records.push(record);
         this.saveToStorage();
-        
+
         document.getElementById('recordText').value = '';
         document.getElementById('imagePreview').innerHTML = '';
         document.getElementById('recordImage').value = '';
-        
+
         this.hideModal('recordModal');
         this.updateUI();
     }
@@ -386,8 +450,8 @@ class ChallengeApp {
         if (!this.currentChallenge) return;
 
         // 現在の挑戦を履歴に追加
-        this.challengeHistory.push({...this.currentChallenge});
-        
+        this.challengeHistory.push({ ...this.currentChallenge });
+
         // 新しい挑戦として再設定
         this.currentChallenge = {
             ...this.currentChallenge,
@@ -399,7 +463,7 @@ class ChallengeApp {
 
         this.startTime = new Date().toISOString();
         this.saveToStorage();
-        
+
         this.hideModal('detailsModal');
         this.updateUI();
         this.startCountdown();
@@ -408,10 +472,10 @@ class ChallengeApp {
     // 履歴表示
     showHistory() {
         this.showScreen('history');
-        
+
         // 統計更新
         document.getElementById('totalChallenges').textContent = this.challengeHistory.length;
-        
+
         const completed = this.challengeHistory.filter(c => c.status === 'completed').length;
         const rate = this.challengeHistory.length > 0 ? Math.round((completed / this.challengeHistory.length) * 100) : 0;
         document.getElementById('achievementRate').textContent = `${rate}%`;
@@ -500,7 +564,7 @@ class ChallengeApp {
             document.getElementById('challengeTitle').textContent = this.currentChallenge.title;
             document.getElementById('challengeStatus').textContent = this.getStatusText(this.currentChallenge.status);
             document.getElementById('todayAction').textContent = this.currentChallenge.firstAction;
-            
+
             // 他人の挑戦人数をランダムに変化
             const count = 100 + Math.floor(Math.random() * 50);
             document.getElementById('othersCount').textContent = count;
@@ -532,7 +596,7 @@ class ChallengeApp {
     // モーダル表示
     showModal(modalId) {
         document.getElementById(modalId).classList.add('active');
-        
+
         // 理由モーダルの場合はランダム理由を表示
         if (modalId === 'reasonModal') {
             this.displayRandomReasons();
