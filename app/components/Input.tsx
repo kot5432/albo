@@ -1,22 +1,26 @@
 import React from 'react'
 
-interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+interface InputProps {
   label?: string
-  error?: string
-  type?: 'text' | 'email' | 'password' | 'date' | 'number'
+  placeholder?: string
+  value?: string
   onChange?: (value: string) => void
+  type?: 'text' | 'email' | 'password' | 'date' | 'number' | 'textarea'
+  error?: string
+  className?: string
+  rows?: number
 }
 
-interface TextareaProps extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'onChange'> {
-  label?: string
-  error?: string
-  type: 'textarea'
-  onChange?: (value: string) => void
-}
-
-type CombinedProps = InputProps | TextareaProps
-
-export default function Input({ label, error, className = '', onChange, ...props }: CombinedProps) {
+export default function Input({ 
+  label, 
+  placeholder, 
+  value = '', 
+  onChange, 
+  type = 'text', 
+  error, 
+  className = '',
+  rows = 3
+}: InputProps) {
   const baseClasses = 'w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300'
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -24,9 +28,8 @@ export default function Input({ label, error, className = '', onChange, ...props
       onChange(e.target.value)
     }
   }
-  
-  if ('type' in props && props.type === 'textarea') {
-    const textareaProps = props as TextareaProps
+
+  if (type === 'textarea') {
     return (
       <div className="space-y-2">
         {label && (
@@ -36,8 +39,10 @@ export default function Input({ label, error, className = '', onChange, ...props
         )}
         <textarea
           className={`${baseClasses} resize-none ${className}`}
-          {...textareaProps}
+          placeholder={placeholder}
+          value={value}
           onChange={handleChange}
+          rows={rows}
         />
         {error && (
           <p className="text-sm text-red-400">{error}</p>
@@ -45,8 +50,7 @@ export default function Input({ label, error, className = '', onChange, ...props
       </div>
     )
   }
-  
-  const inputProps = props as InputProps
+
   return (
     <div className="space-y-2">
       {label && (
@@ -56,7 +60,9 @@ export default function Input({ label, error, className = '', onChange, ...props
       )}
       <input
         className={`${baseClasses} ${className}`}
-        {...inputProps}
+        type={type}
+        placeholder={placeholder}
+        value={value}
         onChange={handleChange}
       />
       {error && (
