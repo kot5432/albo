@@ -625,7 +625,8 @@ body.no-scroll {
     width: 100% !important;
     max-width: 1200px !important;
     /* PC向けに大きく広げる */
-    padding: 40px 0;
+    padding: 60px 0;
+    /* 上下のパディングを増やしてゆとりを持たせる */
     background: transparent;
     border-radius: 0;
     box-shadow: none;
@@ -663,7 +664,8 @@ body.no-scroll {
 
 .focused-form .form-group {
     width: 100% !important;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
+    /* 間隔を適正に戻す */
 }
 
 .focused-form label {
@@ -686,10 +688,12 @@ body.no-scroll {
 
 #declarationScreen textarea#challengeInput {
     min-height: 70px;
+    /* 少しだけ高さを抑えて全体バランスを調整 */
 }
 
 #declarationScreen textarea#challengeReason {
     min-height: 50px;
+    /* 少しだけ高さを抑えて全体バランスを調整 */
 }
 
 .focused-form .modal-footer {
