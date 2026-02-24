@@ -5,16 +5,17 @@ export const config = {
     runtime: 'edge',
 };
 
-export default async function handler(req, res) {
+export default async function handler(req) {
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+        return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
     }
 
     try {
-        const { text } = req.body;
+        const body = await req.json();
+        const { text } = body;
 
         if (!text) {
-            return res.status(400).json({ error: 'Text is required' });
+            return new Response(JSON.stringify({ error: 'Text is required' }), { status: 400 });
         }
 
         const model = google('gemini-1.5-flash');
@@ -57,16 +58,22 @@ T: 期限がある
 
         const data = JSON.parse(jsonMatch[0]);
 
-        return res.status(200).json({
+        return new Response(JSON.stringify({
             ...data,
             success: true
+        }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
         });
 
     } catch (error) {
         console.error('Concretization error:', error);
-        return res.status(500).json({
+        return new Response(JSON.stringify({
             error: '具体化に失敗しました',
             success: false
+        }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
         });
     }
 }

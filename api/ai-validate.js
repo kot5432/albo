@@ -5,17 +5,21 @@ export const config = {
   runtime: 'edge',
 };
 
-export default async function handler(req, res) {
+export default async function handler(req) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
   }
 
+  let text = '';
   try {
-    const { text } = req.body;
+    const body = await req.json();
+    text = body.text;
 
     if (!text) {
-      return res.status(400).json({ error: 'Text is required' });
+      return new Response(JSON.stringify({ error: 'Text is required' }), { status: 400 });
     }
+
+    const model = google('gemini-1.5-flash');
 
     const prompt = `
 あなたは挑戦内容の具体性を判定する専門AIです。
@@ -50,7 +54,6 @@ export default async function handler(req, res) {
       temperature: 0.1,
     });
 
-    // JSONを抽出（AIが前後にテキストを付けても大丈夫なように）
     const jsonMatch = result.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('AIが有効なJSONを出力しませんでした');
@@ -58,12 +61,15 @@ export default async function handler(req, res) {
 
     const data = JSON.parse(jsonMatch[0]);
 
-    return res.status(200).json({
+    return new Response(JSON.stringify({
       isValid: data.isConcrete,
       message: data.isConcrete ? '✓ 具体的な表現です' : 'もっと具体的にしてください',
       reason: data.reason,
       improvedExample: data.improvedExample,
       success: true
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
@@ -71,13 +77,16 @@ export default async function handler(req, res) {
 
     // フォールバック：ルールベースチェック
     const abstractWords = ['頑張る', '努力する', 'がんばる', 'する', 'やる', '取り組む'];
-    const isAbstract = abstractWords.some(word => text.includes(word));
+    const isAbstract = text ? abstractWords.some(word => text.includes(word)) : false;
 
-    return res.status(200).json({
+    return new Response(JSON.stringify({
       isValid: !isAbstract,
       message: isAbstract ? '⚠ もっと具体的にしてください' : '✓ 具体的な表現です',
       success: true,
       fallback: true
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
     });
   }
 }
