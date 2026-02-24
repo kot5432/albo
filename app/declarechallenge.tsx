@@ -14,10 +14,21 @@ export default function DeclareChallenge({ challenges, setChallenges, onViewHist
   const declareChallenge = () => {
     if (!input.trim()) return
     const today = new Date().toLocaleString()
-    setChallenges(prev => [
-      ...prev,
-      { content: input, status: "未開始", tasks: [], retryCount: 0, declareDate: today }
-    ])
+    const newChallenge: Challenge = {
+      id: Date.now().toString(),
+      title: input,
+      description: "",
+      deadline: new Date(),
+      status: "not_started",
+      initialAction: "",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      firstActionDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      actionLogs: [],
+      isReasonShared: false,
+      retryCount: 0
+    }
+    setChallenges(prev => [...prev, newChallenge])
     setInput("")
   }
 
@@ -43,9 +54,9 @@ export default function DeclareChallenge({ challenges, setChallenges, onViewHist
       {/* 挑戦ログ（簡易版） */}
       <div>
         <h2>挑戦ログ</h2>
-        {challenges.map((c,i)=>(
-          <div key={i}>
-            {c.content} [{c.status}]
+        {challenges.map((c)=>(
+          <div key={c.id}>
+            {c.title} [{c.status}]
           </div>
         ))}
       </div>
