@@ -1,20 +1,22 @@
 import React from 'react'
 
-interface BaseInputProps {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   label?: string
   error?: string
+  type?: 'text' | 'email' | 'password' | 'date' | 'number'
   onChange?: (value: string) => void
 }
 
-interface InputProps extends BaseInputProps, Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
-  type?: 'text' | 'email' | 'password' | 'date' | 'number'
-}
-
-interface TextareaProps extends BaseInputProps, Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'onChange'> {
+interface TextareaProps extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'onChange'> {
+  label?: string
+  error?: string
   type: 'textarea'
+  onChange?: (value: string) => void
 }
 
-export default function Input({ label, error, className = '', onChange, ...props }: InputProps | TextareaProps) {
+type CombinedProps = InputProps | TextareaProps
+
+export default function Input({ label, error, className = '', onChange, ...props }: CombinedProps) {
   const baseClasses = 'w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300'
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
