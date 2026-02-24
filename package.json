@@ -1,0 +1,27 @@
+{
+  "name": "albo",
+  "version": "1.0.0",
+  "description": "ユーザーが初動する心理トリガーを体験できるプロトタイプアプリケーションです。",
+  "main": "script.js",
+  "scripts": {
+    "dev": "http-server -p 8000 -o",
+    "start": "http-server -p 8000 -o",
+    "serve": "python -m http.server 8000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kot5432/albo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/kot5432/albo/issues"
+  },
+  "homepage": "https://github.com/kot5432/albo#readme",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
