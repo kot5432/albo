@@ -20,8 +20,8 @@ export default function HistoryPage({ challenges, onBack }: Props) {
       <div>
         <h2>過去挑戦リスト</h2>
         <ul>
-          {challenges.map((c,i)=>(
-            <li key={i}>{c.content} ({c.status})</li>
+          {challenges.map((c)=>(
+            <li key={c.id}>{c.title} ({c.status})</li>
           ))}
         </ul>
       </div>
