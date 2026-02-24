@@ -23,6 +23,13 @@ class ChallengeApp {
         this.bindEvents();
         this.updateUI();
         this.startCountdown();
+
+        // 初期画面の振り分け
+        if (this.currentChallenge) {
+            this.showScreen('home');
+        } else {
+            this.showScreen('lp');
+        }
     }
 
     // ローカルストレージからデータ読み込み
@@ -52,7 +59,7 @@ class ChallengeApp {
     bindEvents() {
         // LP -> 宣言作成
         document.getElementById('startChallenge').addEventListener('click', () => {
-            this.showModal('declarationModal');
+            this.showScreen('declarationScreen');
         });
 
         // 宣言作成 -> AI提案
@@ -76,8 +83,7 @@ class ChallengeApp {
             document.getElementById('aiSuggestion').textContent = aiSuggestion;
             document.getElementById('editableAction').value = aiSuggestion;
 
-            this.hideModal('declarationModal');
-            this.showModal('aiActionModal');
+            this.showScreen('aiActionScreen');
         });
 
         // AI提案 -> 不可逆確認
@@ -88,8 +94,7 @@ class ChallengeApp {
                 return;
             }
 
-            this.hideModal('aiActionModal');
-            this.showModal('irreversibleModal');
+            this.showScreen('irreversibleScreen');
         });
 
         // 不可逆確認 -> ホーム
@@ -591,6 +596,14 @@ class ChallengeApp {
             screen.classList.remove('active');
         });
         document.getElementById(screenId).classList.add('active');
+
+        // ホーム画面以外はスクロール禁止（没入感のため）
+        if (screenId === 'home' || screenId === 'history' || screenId === 'notes') {
+            document.body.style.overflow = 'auto';
+        } else {
+            document.body.style.overflow = 'hidden';
+            window.scrollTo(0, 0);
+        }
     }
 
     // モーダル表示

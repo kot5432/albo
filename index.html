@@ -53,75 +53,81 @@
         </div>
     </div>
 
-    <!-- 宣言作成モーダル -->
-    <div id="declarationModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>今日から挑戦すること</h2>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="challengeInput">具体的な挑戦内容</label>
-                    <textarea id="challengeInput" placeholder="例：毎日30分間プログラミングを学習する"></textarea>
-                    <div class="ai-check">
-                        <span class="check-status">✓ 具体的な表現です</span>
-                        <button id="autoConcretize" class="btn-secondary btn-sm"
-                            style="display: none; margin-top: 5px; padding: 6px 12px; font-size: 0.8rem;">AIで具体化する</button>
+    <!-- 宣言作成スクリーン -->
+    <div id="declarationScreen" class="screen">
+        <div class="container">
+            <div class="focused-form">
+                <div class="modal-header">
+                    <h2>今日から挑戦すること</h2>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="challengeInput">具体的な挑戦内容</label>
+                        <textarea id="challengeInput" placeholder="例：毎日30分間プログラミングを学習する"></textarea>
+                        <div class="ai-check">
+                            <span class="check-status">✓ 具体的な表現です</span>
+                            <button id="autoConcretize" class="btn-secondary btn-sm"
+                                style="display: none; margin-top: 5px; padding: 6px 12px; font-size: 0.8rem;">AIで具体化する</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="deadline">期限</label>
+                        <input type="date" id="deadline">
+                    </div>
+                    <div class="form-group">
+                        <label for="challengeReason">挑戦する理由（任意）</label>
+                        <textarea id="challengeReason" placeholder="なぜこの挑戦をするのか？"></textarea>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="deadline">期限</label>
-                    <input type="date" id="deadline">
+                <div class="modal-footer">
+                    <button id="nextToAI" class="btn-primary">次へ</button>
                 </div>
-                <div class="form-group">
-                    <label for="challengeReason">挑戦する理由（任意）</label>
-                    <textarea id="challengeReason" placeholder="なぜこの挑戦をするのか？"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="nextToAI" class="btn-primary">次へ</button>
             </div>
         </div>
     </div>
 
-    <!-- AI初動提示モーダル -->
-    <div id="aiActionModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>今日やる最小行動</h2>
-            </div>
-            <div class="modal-body">
-                <div class="ai-suggestion">
-                    <p id="aiSuggestion">AIが提案する最小行動がここに表示されます</p>
-                    <textarea id="editableAction" placeholder="編集可能です"></textarea>
+    <!-- AI初動提示スクリーン -->
+    <div id="aiActionScreen" class="screen">
+        <div class="container">
+            <div class="focused-form">
+                <div class="modal-header">
+                    <h2>今日やる最小行動</h2>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button id="approveAction" class="btn-primary">承認する</button>
+                <div class="modal-body">
+                    <div class="ai-suggestion">
+                        <p id="aiSuggestion">AIが提案する最小行動がここに表示されます</p>
+                        <textarea id="editableAction" placeholder="編集可能です"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="approveAction" class="btn-primary">承認する</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 不可逆確認モーダル -->
-    <div id="irreversibleModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>最終確認</h2>
-            </div>
-            <div class="modal-body">
-                <div class="warning">
-                    <p>⚠️ この宣言は削除できません</p>
-                    <p>⚠️ 達成できなくても履歴に残ります</p>
+    <!-- 不可逆確認スクリーン -->
+    <div id="irreversibleScreen" class="screen">
+        <div class="container">
+            <div class="focused-form">
+                <div class="modal-header">
+                    <h2>最終確認</h2>
                 </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="understandCheck">
-                        <span>理解した</span>
-                    </label>
+                <div class="modal-body">
+                    <div class="warning">
+                        <p>⚠️ この宣言は削除できません</p>
+                        <p>⚠️ 達成できなくても履歴に残ります</p>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="understandCheck">
+                            <span>理解した</span>
+                        </label>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button id="startChallengeFinal" class="btn-primary" disabled>この挑戦を始める</button>
+                <div class="modal-footer">
+                    <button id="startChallengeFinal" class="btn-primary" disabled>この挑戦を始める</button>
+                </div>
             </div>
         </div>
     </div>
