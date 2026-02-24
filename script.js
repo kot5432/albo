@@ -166,9 +166,13 @@ class ChallengeApp {
             });
         });
 
-        // 入力チェック
+        // 入力チェック（デバウンス処理付き）
+        let debounceTimer;
         document.getElementById('challengeInput').addEventListener('input', (e) => {
-            this.checkInputValidity(e.target.value);
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                this.checkInputValidity(e.target.value);
+            }, 500); // 500ms待ってから送信
         });
 
         // AIで具体化ボタン
@@ -226,11 +230,17 @@ class ChallengeApp {
         const checkStatus = document.querySelector('.check-status');
         const autoConcretizeBtn = document.getElementById('autoConcretize');
 
-        if (!input) {
+        if (!input || input.length < 2) {
             checkStatus.textContent = '';
+            checkStatus.style.opacity = '0';
             autoConcretizeBtn.style.display = 'none';
+            document.getElementById('nextToAI').disabled = true; // 無効化
             return false;
         }
+
+        checkStatus.textContent = '...チェック中';
+        checkStatus.style.color = 'var(--text-secondary)';
+        checkStatus.style.opacity = '1';
 
         try {
             const response = await fetch('/api/ai-validate', {
@@ -247,9 +257,12 @@ class ChallengeApp {
                 checkStatus.textContent = data.message;
                 checkStatus.style.color = data.isValid ? '#4CAF50' : '#FF5722';
 
+                // バリデーション結果に応じて「次へ」ボタンを制御
+                const nextBtn = document.getElementById('nextToAI');
+                nextBtn.disabled = !data.isValid;
+
                 if (!data.isValid) {
                     autoConcretizeBtn.style.display = 'block';
-                    // 理由をツールチップやタイトルのように表示することも可能
                     checkStatus.title = data.reason || '';
                 } else {
                     autoConcretizeBtn.style.display = 'none';
@@ -259,27 +272,11 @@ class ChallengeApp {
             }
         } catch (error) {
             console.error('Validation error:', error);
+            // エラー時は安全のため「次へ」を無効化
+            document.getElementById('nextToAI').disabled = true;
         }
 
-        // フォールバック：ルールベースチェック
-        const abstractWords = ['頑張る', '努力する', 'がんばる', 'する', 'やる', '取り組む'];
-        const isAbstract = abstractWords.some(word => input.includes(word));
-
-        if (isAbstract) {
-            checkStatus.textContent = '⚠ もっと具体的にしてください';
-            checkStatus.style.color = '#FF5722';
-            autoConcretizeBtn.style.display = 'block';
-        } else if (input.length < 5) {
-            checkStatus.textContent = '⚠ もっと詳しく書いてください';
-            checkStatus.style.color = '#FF5722';
-            autoConcretizeBtn.style.display = 'none';
-        } else {
-            checkStatus.textContent = '✓ 具体的な表現です';
-            checkStatus.style.color = '#4CAF50';
-            autoConcretizeBtn.style.display = 'none';
-        }
-
-        return !isAbstract && input.length >= 5;
+        return false;
     }
 
     // AIによる具体化を実行

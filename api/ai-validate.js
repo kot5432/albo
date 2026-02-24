@@ -22,26 +22,29 @@ export default async function handler(req) {
     const model = google('gemini-1.5-flash');
 
     const prompt = `
-あなたは挑戦内容の具体性を判定する専門AIです。
+あなたは挑戦内容の「意味の有無」と「具体性」を判定する専門家です。
 
-以下の基準で評価してください。
+以下の【判定フロー】に従って、厳格かつ柔軟に判定してください。
 
-【具体的の定義】
-・行動が明確
-・時間や量が定義されている
-・今日から行動できる
+### 【STEP 1：意味があるか？】
+・日本語として意味が通じる言葉であること。
+・× 拒絶：あいうえお、あぽいづふぁ、asdfgh、などのキーボード叩きや音の羅列。
+・これらに該当する場合は、即座に isValid: false とし、理由は「意味のある言葉を入力してください」としてください。
 
-【抽象的の定義】
-・概念的（例：頑張る、成功する、変わる）
-・期限や量がない
-・何をすればいいか不明確
+### 【STEP 2：具体的か？】
+・何をするかが明確であること。数値（時間、量）があるとより良い。
+・◯ 合格例：「JSというプログラミング言語を一日30分勉強する」「腕立てを毎日10回する」
+・△ 改善の余地（isValid: trueだが改善案を出す）：「プログラミングを学ぶ」「運動する」
+・× 抽象的すぎる（isValid: false）：「頑張る」「成功する」「幸せになる」
 
-必ずJSONで返してください。
+### 【判定のゴール】
+・「JSというプログラミング言語を一日30分勉強する」のような具体的な入力は、文句なしの合格（isValid: true）です。
 
+必ず以下のJSON形式で回答してください：
 {
   "isConcrete": boolean,
   "reason": "なぜそう判断したか",
-  "improvedExample": "抽象的な場合のみ具体例を出す"
+  "improvedExample": "具体的でない場合にのみ、より具体的にするための提案"
 }
 
 判定対象：${text}
@@ -75,15 +78,13 @@ export default async function handler(req) {
   } catch (error) {
     console.error('Validation error:', error);
 
-    // フォールバック：ルールベースチェック
-    const abstractWords = ['頑張る', '努力する', 'がんばる', 'する', 'やる', '取り組む'];
-    const isAbstract = text ? abstractWords.some(word => text.includes(word)) : false;
-
+    // AIが失敗した場合は、ユーザーに具体入力を促す（安全側に倒す）
     return new Response(JSON.stringify({
-      isValid: !isAbstract,
-      message: isAbstract ? '⚠ もっと具体的にしてください' : '✓ 具体的な表現です',
+      isValid: false,
+      message: 'もっと具体的に入力してください',
       success: true,
-      fallback: true
+      fallback: true,
+      reason: 'AIによる判定に失敗しました。意味の通じる文章を入力してください。'
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
