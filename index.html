@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>挑戦アプリ プロトタイプ</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- LP Landing Page -->
+    <div id="lp" class="screen active">
+        <div class="container">
+            <div class="logo">
+                <h1>挑戦</h1>
+                <p>始めるための心理トリガー</p>
+            </div>
+            <button id="startChallenge" class="btn-primary">挑戦を始める</button>
+        </div>
+    </div>
+
+    <!-- ホーム画面 -->
+    <div id="home" class="screen">
+        <div class="container">
+            <div class="challenge-card">
+                <h2 id="challengeTitle">挑戦名</h2>
+                <div class="status">
+                    <span id="challengeStatus">準備中</span>
+                </div>
+                <div class="countdown" id="countdown">
+                    <span id="timeRemaining">24:00:00</span>
+                    <p>初動までの時間</p>
+                </div>
+                <div class="today-action">
+                    <h3>今日の行動</h3>
+                    <p id="todayAction">-</p>
+                </div>
+                <div class="actions">
+                    <button id="viewDetails" class="btn-secondary">挑戦詳細</button>
+                    <button id="openRecord" class="btn-secondary">記録画面へ</button>
+                    <button id="viewHistory" class="btn-secondary">履歴</button>
+                    <button id="openNotes" class="btn-secondary">構想ノート</button>
+                </div>
+            </div>
+            <div class="others-count">
+                <p>現在 <span id="othersCount">127</span> 人が挑戦中</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 宣言作成モーダル -->
+    <div id="declarationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>今日から挑戦すること</h2>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="challengeInput">具体的な挑戦内容</label>
+                    <textarea id="challengeInput" placeholder="例：毎日30分間プログラミングを学習する"></textarea>
+                    <div class="ai-check">
+                        <span class="check-status">✓ 具体的な表現です</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="deadline">期限</label>
+                    <input type="date" id="deadline">
+                </div>
+                <div class="form-group">
+                    <label for="challengeReason">挑戦する理由（任意）</label>
+                    <textarea id="challengeReason" placeholder="なぜこの挑戦をするのか？"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="nextToAI" class="btn-primary">次へ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI初動提示モーダル -->
+    <div id="aiActionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>今日やる最小行動</h2>
+            </div>
+            <div class="modal-body">
+                <div class="ai-suggestion">
+                    <p id="aiSuggestion">AIが提案する最小行動がここに表示されます</p>
+                    <textarea id="editableAction" placeholder="編集可能です"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="approveAction" class="btn-primary">承認する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 不可逆確認モーダル -->
+    <div id="irreversibleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>最終確認</h2>
+            </div>
+            <div class="modal-body">
+                <div class="warning">
+                    <p>⚠️ この宣言は削除できません</p>
+                    <p>⚠️ 達成できなくても履歴に残ります</p>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="understandCheck">
+                        <span>理解した</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="startChallengeFinal" class="btn-primary" disabled>この挑戦を始める</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 記録画面モーダル -->
+    <div id="recordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>挑戦記録</h2>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="recordText">今日の記録</label>
+                    <textarea id="recordText" placeholder="今日の取り組みを記録してください"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="recordImage">画像添付（任意）</label>
+                    <input type="file" id="recordImage" accept="image/*">
+                    <div id="imagePreview"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveRecord" class="btn-primary">記録する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 挑戦詳細・再挑戦確認モーダル -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>挑戦詳細</h2>
+            </div>
+            <div class="modal-body">
+                <div class="challenge-info">
+                    <h3 id="detailTitle">挑戦名</h3>
+                    <p>宣言日：<span id="detailStartDate">-</span></p>
+                    <p>期限：<span id="detailDeadline">-</span></p>
+                    <p>状態：<span id="detailStatus">-</span></p>
+                </div>
+                <div class="action-log">
+                    <h4>行動ログ</h4>
+                    <div id="actionLogList"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="retryChallenge" class="btn-primary">再挑戦する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 履歴画面 -->
+    <div id="history" class="screen">
+        <div class="container">
+            <div class="header">
+                <h2>挑戦履歴</h2>
+                <button id="backToHome" class="btn-secondary">戻る</button>
+            </div>
+            <div class="statistics">
+                <div class="stat-item">
+                    <h3>総挑戦数</h3>
+                    <p id="totalChallenges">0</p>
+                </div>
+                <div class="stat-item">
+                    <h3>達成率</h3>
+                    <p id="achievementRate">0%</p>
+                </div>
+            </div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <!-- 構想ノート -->
+    <div id="notesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>構想ノート</h2>
+            </div>
+            <div class="modal-body">
+                <textarea id="notesContent" placeholder="自由にアイデアを書いてみましょう"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="saveNotes" class="btn-secondary">保存</button>
+                <button id="convertToChallenge" class="btn-primary">挑戦にする</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 挑戦理由モーダル -->
+    <div id="reasonModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>挑戦する理由</h2>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="reasonInput">あなたの挑戦理由</label>
+                    <textarea id="reasonInput" placeholder="なぜこの挑戦をするのか、あなたの想いを聞かせてください"></textarea>
+                </div>
+                <div class="others-reasons">
+                    <h3>他人の挑戦理由</h3>
+                    <div id="reasonsList"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveReason" class="btn-primary">保存する</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
