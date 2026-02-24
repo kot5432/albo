@@ -56,7 +56,7 @@ class ChallengeApp {
         });
 
         // 宣言作成 -> AI提案
-        document.getElementById('nextToAI').addEventListener('click', () => {
+        document.getElementById('nextToAI').addEventListener('click', async () => {
             const challengeInput = document.getElementById('challengeInput').value.trim();
             const deadline = document.getElementById('deadline').value;
             const reason = document.getElementById('challengeReason').value.trim();
@@ -72,7 +72,7 @@ class ChallengeApp {
             }
 
             // AI提案生成
-            const aiSuggestion = this.generateAISuggestion(challengeInput);
+            const aiSuggestion = await this.generateAISuggestion(challengeInput);
             document.getElementById('aiSuggestion').textContent = aiSuggestion;
             document.getElementById('editableAction').value = aiSuggestion;
 
@@ -168,33 +168,75 @@ class ChallengeApp {
     }
 
     // AI提案生成
-    generateAISuggestion(challengeText) {
-        const suggestions = {
-            'プログラミング': 'エディタを開いてHello Worldを書く',
-            '勉強': '参考書を1ページ開く',
-            '運動': 'ウェアに着替えてストレッチをする',
-            '読書': '本を1分間開く',
-            '料理': 'レシピを1つ読む',
-            '掃除': '掃除機を1分かける',
-            '英語': '英単語を1つ調べる',
-            '音楽': '楽器を1分間触る',
-            '絵': '鉛筆を1本用意する',
-            'default': '準備を1分間する'
-        };
+    async generateAISuggestion(challengeText) {
+        try {
+            const response = await fetch('/api/ai-suggestion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ challengeText }),
+            });
 
-        for (const [key, value] of Object.entries(suggestions)) {
-            if (challengeText.includes(key)) {
-                return value;
+            const data = await response.json();
+            
+            if (data.success) {
+                return data.suggestion;
+            } else {
+                throw new Error(data.error || 'AI提案の生成に失敗しました');
             }
+        } catch (error) {
+            console.error('AI suggestion error:', error);
+            
+            // フォールバック：ルールベースの提案
+            const suggestions = {
+                'プログラミング': 'エディタを開いてHello Worldを書く',
+                '勉強': '参考書を1ページ開く',
+                '運動': 'ウェアに着替えてストレッチをする',
+                '読書': '本を1分間開く',
+                '料理': 'レシピを1つ読む',
+                '掃除': '掃除機を1分かける',
+                '英語': '英単語を1つ調べる',
+                '音楽': '楽器を1分間触る',
+                '絵': '鉛筆を1本用意する',
+                'default': '準備を1分間する'
+            };
+
+            for (const [key, value] of Object.entries(suggestions)) {
+                if (challengeText.includes(key)) {
+                    return value;
+                }
+            }
+            return suggestions.default;
         }
-        return suggestions.default;
     }
 
     // 入力の妥当性チェック
-    checkInputValidity(input) {
+    async checkInputValidity(input) {
         const checkStatus = document.querySelector('.check-status');
-        const abstractWords = ['頑張る', '努力する', 'がんばる', 'する', 'やる', '取り組む'];
         
+        try {
+            const response = await fetch('/api/ai-validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: input }),
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                checkStatus.textContent = data.message;
+                checkStatus.style.color = data.isValid ? '#4CAF50' : '#FF5722';
+                return data.isValid;
+            }
+        } catch (error) {
+            console.error('Validation error:', error);
+        }
+
+        // フォールバック：ルールベースチェック
+        const abstractWords = ['頑張る', '努力する', 'がんばる', 'する', 'やる', '取り組む'];
         const isAbstract = abstractWords.some(word => input.includes(word));
         
         if (isAbstract) {
@@ -207,6 +249,8 @@ class ChallengeApp {
             checkStatus.textContent = '✓ 具体的な表現です';
             checkStatus.style.color = '#4CAF50';
         }
+        
+        return !isAbstract && input.length >= 5;
     }
 
     // 挑戦作成
