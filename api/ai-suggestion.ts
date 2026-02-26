@@ -1,4 +1,4 @@
-import { google } from '@ai-sdk/google';
+import { groq } from '@ai-sdk/groq';
 import { generateText } from 'ai';
 
 export const config = {
@@ -18,7 +18,7 @@ export default async function handler(req) {
       return new Response(JSON.stringify({ error: 'Challenge text is required' }), { status: 400 });
     }
 
-    const model = google('gemini-1.5-flash');
+    const model = groq('llama-3.1-8b-instant');
 
     const prompt = `
 あなたは挑戦初動設計AIです。

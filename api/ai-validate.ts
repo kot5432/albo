@@ -1,4 +1,4 @@
-import { google } from '@ai-sdk/google';
+import { groq } from '@ai-sdk/groq';
 import { generateText } from 'ai';
 
 export const config = {
@@ -19,7 +19,7 @@ export default async function handler(req) {
       return new Response(JSON.stringify({ error: 'Text is required' }), { status: 400 });
     }
 
-    const model = google('gemini-1.5-flash');
+    const model = groq('llama-3.1-8b-instant');
 
     const prompt = `
 あなたは挑戦内容の「意味の有無」と「具体性」を判定する専門家です。

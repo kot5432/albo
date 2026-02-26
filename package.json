@@ -5,6 +5,7 @@
   "main": "script.js",
   "scripts": {
     "start": "http-server -p 8000",
+    "dev": "http-server -p 8000 -o",
     "build": "echo 'Static site build completed'",
     "vercel-build": "echo 'Static site ready for deployment'",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -25,6 +26,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.30",
+    "@ai-sdk/groq": "^3.0.24",
     "@ai-sdk/openai": "^3.0.31",
     "ai": "^6.0.97"
   }
