@@ -473,6 +473,141 @@ input[type="checkbox"] {
     font-style: italic;
 }
 
+/* 本気度スライダー */
+.seriousness-slider {
+    margin-top: 10px;
+}
+
+.slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #e9ecef;
+    outline: none;
+    -webkit-appearance: none;
+    margin: 10px 0;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #4A90E2;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #4A90E2;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.seriousness-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+.seriousness-value {
+    text-align: center;
+    font-weight: 600;
+    color: #4A90E2;
+    font-size: 1.1rem;
+    margin-top: 5px;
+}
+
+/* AI設計結果 */
+.design-results {
+    padding: 20px 0;
+}
+
+.design-section {
+    margin-bottom: 25px;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.design-section h3 {
+    color: #4A90E2;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.design-section p {
+    margin: 5px 0;
+    line-height: 1.5;
+}
+
+.refined-challenge {
+    background: #e8f4fd;
+    border-color: #4A90E2;
+}
+
+.category-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+.category-learning { background: #e3f2fd; color: #1976d2; }
+.category-health { background: #e8f5e8; color: #388e3c; }
+.category-publish { background: #fff3e0; color: #f57c00; }
+.category-creative { background: #f3e5f5; color: #7b1fa2; }
+.category-business { background: #fce4ec; color: #c2185b; }
+.category-social { background: #e0f2f1; color: #00796b; }
+
+.difficulty-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.difficulty-1 { background: #e8f5e8; color: #388e3c; }
+.difficulty-2 { background: #fff3e0; color: #f57c00; }
+.difficulty-3 { background: #ffebee; color: #d32f2f; }
+
+.initial-action {
+    background: #f8f9fa;
+    border: 2px solid #4A90E2;
+}
+
+.initial-action h3 {
+    color: #4A90E2;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+.action-details {
+    margin: 10px 0;
+}
+
+.action-time {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.design-reason {
+    background: #f8f9fa;
+    border-left: 4px solid #4A90E2;
+    padding: 15px;
+    font-style: italic;
+    color: #495057;
+}
+
 .action-log h4 {
     color: #4A90E2;
     margin-bottom: 15px;

@@ -117,6 +117,8 @@ class ChallengeApp {
         this.startCountdown();
         this.setupDeadlineInput();
         this.setupChallengeInput();
+        this.setupDeadlineInput();
+        this.setupSeriousnessSlider();
 
         // 初期画面の振り分け
         if (this.currentChallenge) {
@@ -126,7 +128,79 @@ class ChallengeApp {
         }
     }
 
-    // 挑戦入力のセットアップ
+    // 本気度スライダーのセットアップ
+    setupSeriousnessSlider() {
+        const slider = document.getElementById('seriousness');
+        const valueDisplay = document.getElementById('seriousnessValue');
+        const deadlineSelect = document.getElementById('deadline');
+        const deadlineDate = document.getElementById('deadlineDate');
+        const deadlineQuickSelect = document.getElementById('deadlineQuickSelect');
+
+        // スライダー値の更新
+        slider.addEventListener('input', () => {
+            valueDisplay.textContent = slider.value;
+            this.validateChallengeInput();
+        });
+
+        // 期限選択の制御
+        deadlineSelect.addEventListener('change', () => {
+            if (deadlineSelect.value === 'custom') {
+                deadlineDate.style.display = 'block';
+                deadlineQuickSelect.style.display = 'flex';
+                this.setupDeadlineQuickSelect();
+            } else {
+                deadlineDate.style.display = 'none';
+                deadlineQuickSelect.style.display = 'none';
+            }
+            this.validateChallengeInput();
+        });
+
+        // 入力バリデーション
+        [document.getElementById('challengeText'), document.getElementById('reason')].forEach(element => {
+            element.addEventListener('input', () => this.validateChallengeInput());
+        });
+    }
+
+    // 期限クイック選択のセットアップ
+    setupDeadlineQuickSelect() {
+        const deadlineDate = document.getElementById('deadlineDate');
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const maxDate = new Date(today);
+        maxDate.setMonth(maxDate.getMonth() + 3);
+
+        // 日付の制限を設定
+        deadlineDate.min = tomorrow.toISOString().split('T')[0];
+        deadlineDate.max = maxDate.toISOString().split('T')[0];
+
+        // クイック選択ボタンのイベントリスナー
+        document.querySelectorAll('#deadlineQuickSelect .btn-quick').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const days = parseInt(e.target.dataset.days);
+                const targetDate = new Date(today);
+                targetDate.setDate(targetDate.getDate() + days);
+                deadlineDate.value = targetDate.toISOString().split('T')[0];
+            });
+        });
+    }
+
+    // 挑戦入力のバリデーション
+    validateChallengeInput() {
+        const challengeText = document.getElementById('challengeText').value.trim();
+        const deadline = document.getElementById('deadline').value;
+        const deadlineDate = document.getElementById('deadlineDate').value;
+        const seriousness = document.getElementById('seriousness').value;
+        const nextBtn = document.getElementById('nextToAI');
+
+        const isValid = challengeText && 
+                        seriousness && 
+                        (deadline !== 'custom' || deadlineDate);
+
+        nextBtn.disabled = !isValid;
+    }
+
+    // 期限入力のセットアップ
     setupChallengeInput() {
         const challengeType = document.getElementById('challengeType');
         const frequency = document.getElementById('frequency');
@@ -289,28 +363,51 @@ class ChallengeApp {
             this.showScreen('declarationScreen');
         });
 
-        // 宣言作成 -> AI提案
+        // 宣言作成 -> AI設計
         document.getElementById('nextToAI').addEventListener('click', async () => {
-            const challengeText = this.getChallengeText();
+            const challengeText = document.getElementById('challengeText').value.trim();
             const deadline = document.getElementById('deadline').value;
-            const reason = document.getElementById('challengeReason').value.trim();
+            const deadlineDate = document.getElementById('deadlineDate').value;
+            const seriousness = document.getElementById('seriousness').value;
+            const reason = document.getElementById('reason').value.trim();
 
             if (!challengeText) {
-                this.showError('挑戦内容を正しく入力してください');
+                this.showError('挑戦内容を入力してください');
                 return;
             }
 
-            if (!deadline) {
-                this.showError('期限を設定してください');
-                return;
+            // 期限の処理
+            let finalDeadline = '';
+            if (deadline === 'custom' && deadlineDate) {
+                finalDeadline = deadlineDate;
+            } else if (deadline === '1month') {
+                const date = new Date();
+                date.setMonth(date.getMonth() + 1);
+                finalDeadline = date.toISOString().split('T')[0];
+            } else if (deadline === '3months') {
+                const date = new Date();
+                date.setMonth(date.getMonth() + 3);
+                finalDeadline = date.toISOString().split('T')[0];
+            } else if (deadline === '6months') {
+                const date = new Date();
+                date.setMonth(date.getMonth() + 6);
+                finalDeadline = date.toISOString().split('T')[0];
             }
 
-            // AI提案生成
-            const aiSuggestion = await this.generateAISuggestion(challengeText);
-            document.getElementById('aiSuggestion').textContent = aiSuggestion;
-            document.getElementById('editableAction').value = aiSuggestion;
+            // AI設計を呼び出し
+            const design = await this.generateChallengeDesign(challengeText, finalDeadline, seriousness, reason);
+            this.displayDesignResults(design);
+            this.showScreen('aiDesignScreen');
+        });
 
-            this.showScreen('aiActionScreen');
+        // AI設計画面 -> 戻る
+        document.getElementById('backToDeclaration').addEventListener('click', () => {
+            this.showScreen('declarationScreen');
+        });
+
+        // AI設計 -> 承認
+        document.getElementById('approveDesign').addEventListener('click', () => {
+            this.createChallengeFromDesign();
         });
 
         // AI提案 -> 不可逆確認
@@ -429,7 +526,141 @@ class ChallengeApp {
         return challengeText;
     }
 
-    // AI提案生成
+    // AI設計生成
+    async generateChallengeDesign(challengeText, deadline, seriousness, reason) {
+        try {
+            const response = await fetch('/api/challenge/design', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    challengeText,
+                    deadline,
+                    seriousness: parseInt(seriousness),
+                    reason
+                }),
+            });
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Challenge design error:', error);
+            throw new Error('AI設計の生成に失敗しました');
+        }
+    }
+
+    // 設計結果の表示
+    displayDesignResults(design) {
+        const resultsContainer = document.getElementById('designResults');
+        
+        const categoryClass = this.getCategoryClass(design.category);
+        const difficultyClass = this.getDifficultyClass(design.difficultyLevel);
+        const actionTypeLabel = this.getActionTypeLabel(design.initialAction.actionType);
+
+        resultsContainer.innerHTML = `
+            ${!design.isConcrete && design.refinedChallenge ? `
+            <div class="design-section refined-challenge">
+                <h3>🎯 改善された挑戦</h3>
+                <p><strong>${design.refinedChallenge.title}</strong></p>
+                <p>${design.refinedChallenge.description}</p>
+            </div>
+            ` : ''}
+            
+            <div class="design-section">
+                <h3>📊 挑戦分析</h3>
+                <p>
+                    <span class="category-badge ${categoryClass}">${design.category}</span>
+                    <span class="difficulty-badge ${difficultyClass}">Level ${design.difficultyLevel}</span>
+                </p>
+            </div>
+            
+            <div class="design-section initial-action">
+                <h3>🚀 最小初動</h3>
+                <p><strong>${design.initialAction.title}</strong></p>
+                <div class="action-details">
+                    <p>${design.initialAction.description}</p>
+                    <p class="action-time">⏱️ 所要時間：${design.initialAction.estimatedMinutes}分</p>
+                    <p>🎯 アクションタイプ：${actionTypeLabel}</p>
+                </div>
+            </div>
+            
+            <div class="design-section design-reason">
+                <h3>💡 設計理由</h3>
+                <p>${design.designReason}</p>
+            </div>
+        `;
+    }
+
+    // カテゴリクラスの取得
+    getCategoryClass(category) {
+        const classMap = {
+            '学習系': 'category-learning',
+            '健康系': 'category-health',
+            '発信系': 'category-publish',
+            '創作系': 'category-creative',
+            'ビジネス系': 'category-business',
+            '人間関係系': 'category-social'
+        };
+        return classMap[category] || 'category-learning';
+    }
+
+    // 難易度クラスの取得
+    getDifficultyClass(level) {
+        return `difficulty-${level}`;
+    }
+
+    // 設計結果から挑戦を作成
+    createChallengeFromDesign() {
+        const challengeText = document.getElementById('challengeText').value.trim();
+        const deadline = document.getElementById('deadline').value;
+        const deadlineDate = document.getElementById('deadlineDate').value;
+        const seriousness = document.getElementById('seriousness').value;
+        const reason = document.getElementById('reason').value.trim();
+
+        // 期限の処理
+        let finalDeadline = '';
+        if (deadline === 'custom' && deadlineDate) {
+            finalDeadline = deadlineDate;
+        } else if (deadline === '1month') {
+            const date = new Date();
+            date.setMonth(date.getMonth() + 1);
+            finalDeadline = date.toISOString().split('T')[0];
+        } else if (deadline === '3months') {
+            const date = new Date();
+            date.setMonth(date.getMonth() + 3);
+            finalDeadline = date.toISOString().split('T')[0];
+        } else if (deadline === '6months') {
+            const date = new Date();
+            date.setMonth(date.getMonth() + 6);
+            finalDeadline = date.toISOString().split('T')[0];
+        }
+
+        // AI設計結果を取得（現在表示されているもの）
+        const designResults = document.getElementById('designResults');
+        const actionTitle = designResults.querySelector('.initial-action strong')?.textContent || '挑戦を始める';
+        const actionDescription = designResults.querySelector('.action-details p')?.textContent || '準備を始める';
+
+        this.currentChallenge = {
+            id: Date.now(),
+            title: challengeText,
+            deadline: finalDeadline,
+            firstAction: actionTitle,
+            reason: reason,
+            seriousness: parseInt(seriousness),
+            startDate: new Date().toISOString(),
+            status: 'active',
+            records: [],
+            createdAt: new Date().toISOString()
+        };
+
+        this.startTime = new Date().toISOString();
+        this.saveToStorage();
+
+        this.showScreen('home');
+        this.updateUI();
+        this.startCountdown();
+    }
     async generateAISuggestion(challengeText) {
         try {
             // 4段階処理
