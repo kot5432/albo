@@ -5,7 +5,7 @@ export const config = {
     runtime: 'edge',
 };
 
-export default async function handler(req) {
+export default async function handler(req: Request) {
     if (req.method !== 'POST') {
         return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
     }
@@ -47,7 +47,7 @@ T: 期限がある
         const { text: result } = await generateText({
             model,
             prompt,
-            maxTokens: 400,
+            maxRetries: 3,
             temperature: 0.7,
         });
 
