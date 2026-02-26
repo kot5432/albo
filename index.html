@@ -71,7 +71,12 @@
                     </div>
                     <div class="form-group">
                         <label for="deadline">期限</label>
-                        <input type="date" id="deadline">
+                        <input type="date" id="deadline" min="">
+                        <div class="deadline-quick-select">
+                            <button type="button" class="btn-quick" data-days="7">1週間後</button>
+                            <button type="button" class="btn-quick" data-days="14">2週間後</button>
+                            <button type="button" class="btn-quick" data-days="30">1ヶ月後</button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="challengeReason">挑戦する理由（任意）</label>

@@ -411,6 +411,34 @@ input[type="checkbox"] {
     opacity: 0.9;
 }
 
+/* 期限クイック選択ボタン */
+.deadline-quick-select {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-quick {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-quick:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    transform: translateY(-1px);
+}
+
+.btn-quick:active {
+    transform: translateY(0);
+}
+
 .action-log h4 {
     color: #4A90E2;
     margin-bottom: 15px;

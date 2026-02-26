@@ -23,6 +23,7 @@ class ChallengeApp {
         this.bindEvents();
         this.updateUI();
         this.startCountdown();
+        this.setupDeadlineInput();
 
         // 初期画面の振り分け
         if (this.currentChallenge) {
@@ -30,6 +31,43 @@ class ChallengeApp {
         } else {
             this.showScreen('lp');
         }
+    }
+
+    // 期限入力のセットアップ
+    setupDeadlineInput() {
+        const deadlineInput = document.getElementById('deadline');
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const maxDate = new Date(today);
+        maxDate.setMonth(maxDate.getMonth() + 3);
+
+        // 日付の制限を設定
+        deadlineInput.min = tomorrow.toISOString().split('T')[0];
+        deadlineInput.max = maxDate.toISOString().split('T')[0];
+
+        // クイック選択ボタンのイベントリスナー
+        document.querySelectorAll('.btn-quick').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const days = parseInt(e.target.dataset.days);
+                const targetDate = new Date(today);
+                targetDate.setDate(targetDate.getDate() + days);
+                deadlineInput.value = targetDate.toISOString().split('T')[0];
+                
+                // 選択されたボタンの視覚的フィードバック
+                document.querySelectorAll('.btn-quick').forEach(b => b.style.background = '#f8f9fa');
+                e.target.style.background = '#4A90E2';
+                e.target.style.color = 'white';
+            });
+        });
+
+        // 日付変更時にボタンの色をリセット
+        deadlineInput.addEventListener('change', () => {
+            document.querySelectorAll('.btn-quick').forEach(b => {
+                b.style.background = '#f8f9fa';
+                b.style.color = '';
+            });
+        });
     }
 
     // ローカルストレージからデータ読み込み
