@@ -18,12 +18,105 @@ class ChallengeApp {
         this.init();
     }
 
+    // 挑戦タイプ別のテンプレート
+    challengeTemplates = {
+        learning: {
+            actions: ['英語学習する', 'プログラミングする', '読書する', 'オンライン講座を受ける'],
+            amounts: ['30分', '1時間', '5ページ', '1レッスン'],
+            examples: '毎日30分英語学習する'
+        },
+        health: {
+            actions: ['筋トレする', 'ランニングする', 'ストレッチする', 'ヨガする'],
+            amounts: ['30分', '5km', '3セット', '15分'],
+            examples: '週3回ジムで筋トレする'
+        },
+        creative: {
+            actions: ['絵を描く', '文章を書く', '音楽を作る', 'デザインする'],
+            amounts: ['1時間', '1作品', '500文字', '1曲'],
+            examples: '毎日1時間絵を描く'
+        },
+        business: {
+            actions: ['メール返信する', '資料作成する', 'ネットワーキングする', 'スキルアップする'],
+            amounts: ['10通', '1ページ', '1人', '30分'],
+            examples: '毎日10通ビジネスメールを返信する'
+        },
+        social: {
+            actions: ['友人と連絡する', '家族と話す', 'コミュニティに参加する'],
+            amounts: ['1人', '30分', '1回'],
+            examples: '週に1回友人と連絡する'
+        },
+        publish: {
+            actions: ['ブログを書く', 'SNS投稿する', '動画投稿する', '発信する'],
+            amounts: ['1記事', '1投稿', '1本', '1ツイート'],
+            examples: '毎日1ツイート発信する'
+        }
+    };
+
+    // カテゴリ別最小行動テンプレート
+    minimalActionTemplates = {
+        '学習系': {
+            patterns: [
+                '5分だけ{action}をやってみる',
+                '1ページだけ{action}の教材を開く',
+                '1問だけ{action}の問題を解く',
+                '{action}のアプリを開いてチュートリアルを始める'
+            ],
+            focus: '体験型'
+        },
+        '健康系': {
+            patterns: [
+                '{action}の準備をする（シューズを出す、ウェアを用意する）',
+                '1回だけ{action}をやってみる',
+                '5分だけ{action}の軽いバージョンをやる',
+                '{action}の時間をカレンダーに予約する'
+            ],
+            focus: '環境構築＋超短縮'
+        },
+        '発信系': {
+            patterns: [
+                'SNSで{action}を宣言投稿する',
+                '1回だけ{action}をやってみる（下書きでもOK）',
+                '{action}の下書きを1つ作る',
+                '{action}のアイデアを1つ書き出す'
+            ],
+            focus: '公開型'
+        },
+        '創作系': {
+            patterns: [
+                '{action}の新しいファイルを作る',
+                '1画面だけ{action}をやってみる',
+                '100文字だけ{action}を書く',
+                '{action}の準備を整える（道具を用意する）'
+            ],
+            focus: '小さな完成'
+        },
+        'ビジネス系': {
+            patterns: [
+                '1通だけ{action}のメールを送る',
+                '1人に{action}について相談する',
+                '1社だけ{action}の情報を調べる',
+                '{action}の計画を1つ書き出す'
+            ],
+            focus: '接触行動'
+        },
+        '人間関係系': {
+            patterns: [
+                '1人だけ{action}のメッセージを送る',
+                '1回だけ{action}の挨拶をする',
+                '今日1人に{action}で感謝を伝える',
+                '{action}の時間を5分だけ取る'
+            ],
+            focus: '具体的接触'
+        }
+    };
+
     init() {
         this.loadFromStorage();
         this.bindEvents();
         this.updateUI();
         this.startCountdown();
         this.setupDeadlineInput();
+        this.setupChallengeInput();
 
         // 初期画面の振り分け
         if (this.currentChallenge) {
@@ -31,6 +124,102 @@ class ChallengeApp {
         } else {
             this.showScreen('lp');
         }
+    }
+
+    // 挑戦入力のセットアップ
+    setupChallengeInput() {
+        const challengeType = document.getElementById('challengeType');
+        const frequency = document.getElementById('frequency');
+        const weeklyTimes = document.getElementById('weeklyTimes');
+        const action = document.getElementById('action');
+        const amount = document.getElementById('amount');
+        const timeContext = document.getElementById('timeContext');
+        const preview = document.getElementById('challengePreview');
+
+        // 初期状態
+        preview.classList.add('empty');
+        preview.textContent = '入力すると挑戦内容が表示されます';
+
+        // イベントリスナー
+        [challengeType, frequency, weeklyTimes, action, amount, timeContext].forEach(element => {
+            element.addEventListener('input', () => this.updateChallengePreview());
+            element.addEventListener('change', () => this.updateChallengePreview());
+        });
+
+        // 頻度選択の制御
+        frequency.addEventListener('change', () => {
+            if (frequency.value === 'times') {
+                weeklyTimes.style.display = 'inline-block';
+            } else {
+                weeklyTimes.style.display = 'none';
+            }
+        });
+
+        // 挑戦タイプ選択時のヒント表示
+        challengeType.addEventListener('change', () => {
+            if (challengeType.value && this.challengeTemplates[challengeType.value]) {
+                const template = this.challengeTemplates[challengeType.value];
+                action.placeholder = `例：${template.actions[0]}`;
+                amount.placeholder = `例：${template.amounts[0]}`;
+            }
+        });
+    }
+
+    // 挑戦プレビュー更新
+    updateChallengePreview() {
+        const challengeType = document.getElementById('challengeType').value;
+        const frequency = document.getElementById('frequency').value;
+        const weeklyTimes = document.getElementById('weeklyTimes').value;
+        const action = document.getElementById('action').value;
+        const amount = document.getElementById('amount').value;
+        const timeContext = document.getElementById('timeContext').value;
+        const preview = document.getElementById('challengePreview');
+
+        // 頻度テキストの生成
+        let frequencyText = '';
+        if (frequency === 'daily') {
+            frequencyText = '毎日';
+        } else if (frequency === 'weekly') {
+            frequencyText = '毎週';
+        } else if (frequency === 'times' && weeklyTimes) {
+            frequencyText = `週${weeklyTimes}回`;
+        }
+
+        // プレビューの生成
+        if (frequencyText && action && amount) {
+            let previewText = `${frequencyText}${action}を${amount}`;
+            if (timeContext) {
+                previewText += `（${timeContext}）`;
+            }
+            preview.textContent = previewText;
+            preview.classList.remove('empty');
+        } else {
+            preview.textContent = '入力すると挑戦内容が表示されます';
+            preview.classList.add('empty');
+        }
+
+        // バリデーションとボタン制御
+        this.validateChallengeInput();
+    }
+
+    // 挑戦入力のバリデーション
+    validateChallengeInput() {
+        const challengeType = document.getElementById('challengeType').value;
+        const frequency = document.getElementById('frequency').value;
+        const weeklyTimes = document.getElementById('weeklyTimes').value;
+        const action = document.getElementById('action').value;
+        const amount = document.getElementById('amount').value;
+        const deadline = document.getElementById('deadline').value;
+        const nextBtn = document.getElementById('nextToAI');
+
+        const isValid = challengeType && 
+                        frequency && 
+                        (frequency !== 'times' || weeklyTimes) && 
+                        action && 
+                        amount && 
+                        deadline;
+
+        nextBtn.disabled = !isValid;
     }
 
     // 期限入力のセットアップ
@@ -102,12 +291,12 @@ class ChallengeApp {
 
         // 宣言作成 -> AI提案
         document.getElementById('nextToAI').addEventListener('click', async () => {
-            const challengeInput = document.getElementById('challengeInput').value.trim();
+            const challengeText = this.getChallengeText();
             const deadline = document.getElementById('deadline').value;
             const reason = document.getElementById('challengeReason').value.trim();
 
-            if (!challengeInput) {
-                this.showError('挑戦内容を入力してください');
+            if (!challengeText) {
+                this.showError('挑戦内容を正しく入力してください');
                 return;
             }
 
@@ -117,7 +306,7 @@ class ChallengeApp {
             }
 
             // AI提案生成
-            const aiSuggestion = await this.generateAISuggestion(challengeInput);
+            const aiSuggestion = await this.generateAISuggestion(challengeText);
             document.getElementById('aiSuggestion').textContent = aiSuggestion;
             document.getElementById('editableAction').value = aiSuggestion;
 
@@ -204,43 +393,94 @@ class ChallengeApp {
             });
         });
 
-        // 入力チェック（デバウンス処理付き）
-        let debounceTimer;
-        document.getElementById('challengeInput').addEventListener('input', (e) => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                this.checkInputValidity(e.target.value);
-            }, 500); // 500ms待ってから送信
-        });
-
         // AIで具体化ボタン
         document.getElementById('autoConcretize').addEventListener('click', () => {
             this.concretizeChallenge();
         });
     }
 
+    // 構造化された挑戦テキストを取得
+    getChallengeText() {
+        const frequency = document.getElementById('frequency').value;
+        const weeklyTimes = document.getElementById('weeklyTimes').value;
+        const action = document.getElementById('action').value;
+        const amount = document.getElementById('amount').value;
+        const timeContext = document.getElementById('timeContext').value;
+
+        // 頻度テキストの生成
+        let frequencyText = '';
+        if (frequency === 'daily') {
+            frequencyText = '毎日';
+        } else if (frequency === 'weekly') {
+            frequencyText = '毎週';
+        } else if (frequency === 'times' && weeklyTimes) {
+            frequencyText = `週${weeklyTimes}回`;
+        }
+
+        if (!frequencyText || !action || !amount) {
+            return '';
+        }
+
+        let challengeText = `${frequencyText}${action}を${amount}`;
+        if (timeContext) {
+            challengeText += `（${timeContext}）`;
+        }
+
+        return challengeText;
+    }
+
     // AI提案生成
     async generateAISuggestion(challengeText) {
         try {
+            // 4段階処理
+            // 1. 具体性判定（既存のバリデーション）
+            // 2. カテゴリ分類
+            const category = await this.classifyChallenge(challengeText);
+            
+            // 3. 難易度判定
+            const difficulty = await this.assessDifficulty(challengeText);
+            
+            // 4. カテゴリ別初動生成（難易度レベル情報を含む）
             const response = await fetch('/api/ai-suggestion', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ challengeText }),
+                body: JSON.stringify({ 
+                    challengeText,
+                    category: category.category,
+                    difficultyLevel: difficulty.difficultyLevel
+                }),
             });
 
             const data = await response.json();
 
-            if (data.success) {
-                return data.suggestion;
+            if (data.success && data.initialActionTitle) {
+                // 新しいJSON形式のレスポンスを処理
+                const { initialActionTitle, initialActionDescription, estimatedMinutes, actionType, whyThisFitsCategory } = data;
+                
+                // 難易度情報を追加
+                const difficultyLabel = this.getDifficultyLabel(difficulty.difficultyLevel);
+                
+                // 詳細な説明を生成
+                let detailedDescription = `${initialActionDescription}\n\n⏱️ 所要時間：${estimatedMinutes}分\n🎯 アクションタイプ：${this.getActionTypeLabel(actionType)}\n💡 この行動が選ばれた理由：${whyThisFitsCategory}\n📊 挑戦難易度：${difficultyLabel}`;
+                
+                return detailedDescription;
             } else {
                 throw new Error(data.error || 'AI提案の生成に失敗しました');
             }
         } catch (error) {
             console.error('AI suggestion error:', error);
 
-            // フォールバック：ルールベースの提案
+            // フォールバック：カテゴリ別テンプレートを使用
+            const category = await this.classifyChallenge(challengeText);
+            const template = this.minimalActionTemplates[category.category];
+            if (template) {
+                const pattern = template.patterns[Math.floor(Math.random() * template.patterns.length)];
+                return pattern.replace('{action}', this.extractAction(challengeText));
+            }
+
+            // 最終フォールバック：ルールベースの提案
             const suggestions = {
                 'プログラミング': 'エディタを開いてHello Worldを書く',
                 '勉強': '参考書を1ページ開く',
@@ -261,6 +501,85 @@ class ChallengeApp {
             }
             return suggestions.default;
         }
+    }
+
+    // 難易度判定
+    async assessDifficulty(text) {
+        try {
+            const response = await fetch('/api/ai-difficulty', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text }),
+            });
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Difficulty assessment error:', error);
+            // フォールバック：デフォルト難易度
+            return { difficulty: '中', difficultyLevel: 2, reason: 'フォールバック' };
+        }
+    }
+
+    // 難易度の日本語ラベルを取得
+    getDifficultyLabel(difficultyLevel) {
+        const labels = {
+            1: '🟢 Level 1：習慣レベル',
+            2: '🟡 Level 2：成長レベル', 
+            3: '🔴 Level 3：人生変化レベル'
+        };
+        return labels[difficultyLevel] || '🟡 Level 2：成長レベル';
+    }
+
+    // アクションタイプの日本語ラベルを取得
+    getActionTypeLabel(actionType) {
+        const labels = {
+            'environment': '環境構築型',
+            'mini_execution': '体験型',
+            'public_commitment': '公開型'
+        };
+        return labels[actionType] || 'その他';
+    }
+
+    // 挑戦分類
+    async classifyChallenge(text) {
+        try {
+            const response = await fetch('/api/ai-classify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text }),
+            });
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Classification error:', error);
+            // フォールバック：デフォルト分類
+            return { category: '学習系', reason: 'フォールバック' };
+        }
+    }
+
+    // 行動内容の抽出
+    extractAction(challengeText) {
+        // 簡単な行動抽出ロジック
+        const patterns = [
+            /(.+)を(.+)/,
+            /(.+)する/,
+            /(.+)やる/
+        ];
+        
+        for (const pattern of patterns) {
+            const match = challengeText.match(pattern);
+            if (match) {
+                return match[1] || match[0];
+            }
+        }
+        
+        return '挑戦';
     }
 
     // 入力の妥当性チェック
@@ -359,7 +678,7 @@ class ChallengeApp {
 
     // 挑戦作成
     createChallenge() {
-        const challengeText = document.getElementById('challengeInput').value.trim();
+        const challengeText = this.getChallengeText();
         const deadline = document.getElementById('deadline').value;
         const firstAction = document.getElementById('editableAction').value.trim();
         const reason = document.getElementById('challengeReason').value.trim();

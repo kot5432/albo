@@ -439,6 +439,40 @@ input[type="checkbox"] {
     transform: translateY(0);
 }
 
+/* 挑戦プレビュー */
+.challenge-preview {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.challenge-preview label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.preview-box {
+    min-height: 50px;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    font-size: 1rem;
+    color: #4A90E2;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.preview-box.empty {
+    color: #adb5bd;
+    font-style: italic;
+}
+
 .action-log h4 {
     color: #4A90E2;
     margin-bottom: 15px;

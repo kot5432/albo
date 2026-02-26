@@ -61,13 +61,42 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="challengeInput">具体的な挑戦内容</label>
-                        <textarea id="challengeInput" placeholder="例：毎日30分間プログラミングを学習する"></textarea>
-                        <div class="ai-check">
-                            <span class="check-status"></span>
-                            <button id="autoConcretize" class="btn-secondary btn-sm"
-                                style="display: none; margin-top: 5px; padding: 6px 12px; font-size: 0.8rem;">AIで具体化する</button>
-                        </div>
+                        <label for="challengeType">挑戦タイプ</label>
+                        <select id="challengeType">
+                            <option value="">選択してください</option>
+                            <option value="learning">📚 学習系</option>
+                            <option value="health">💪 健康系</option>
+                            <option value="creative">🎨 創作系</option>
+                            <option value="business">💼 ビジネス系</option>
+                            <option value="social">👥 人間関係系</option>
+                            <option value="publish">📢 発信系</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="frequency">頻度</label>
+                        <select id="frequency">
+                            <option value="">選択してください</option>
+                            <option value="daily">毎日</option>
+                            <option value="weekly">毎週</option>
+                            <option value="times">週〇回</option>
+                        </select>
+                        <input type="number" id="weeklyTimes" min="1" max="7" placeholder="回数" style="display: none; width: 80px; margin-left: 10px;">
+                    </div>
+                    <div class="form-group">
+                        <label for="action">行動内容</label>
+                        <input type="text" id="action" placeholder="例：英語学習する、筋トレする">
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">量・時間</label>
+                        <input type="text" id="amount" placeholder="例：30分、5ページ、3回">
+                    </div>
+                    <div class="form-group">
+                        <label for="timeContext">タイミング（任意）</label>
+                        <input type="text" id="timeContext" placeholder="例：朝、寝る前、通勤中">
+                    </div>
+                    <div class="challenge-preview">
+                        <label>挑戦内容プレビュー</label>
+                        <div id="challengePreview" class="preview-box"></div>
                     </div>
                     <div class="form-group">
                         <label for="deadline">期限</label>
